@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <vector>
+#include <algorithm>
 
 namespace yannl
 {
@@ -21,21 +22,27 @@ namespace yannl
             assert(aNumberOfNodesPerHiddenLayer >= 0);
             assert(aNumberOfHiddenLayers == 0 || aNumberOfNodesPerHiddenLayer > 0);
 
-            int weightCount = mNumberOfHiddenLayers > 0 ? mNumberOfOutputs * (mNumberOfNodesPerHiddenLayer + 1) + mNumberOfNodesPerHiddenLayer * (mNumberOfInputs + 1) + (mNumberOfHiddenLayers - 1) * mNumberOfNodesPerHiddenLayer * (mNumberOfNodesPerHiddenLayer + 1) : mNumberOfOutputs * (mNumberOfInputs + 1);
-            mWeights.resize(weightCount, 0);
+            mWeightCount = mNumberOfHiddenLayers > 0 ? mNumberOfOutputs * (mNumberOfNodesPerHiddenLayer + 1) + mNumberOfNodesPerHiddenLayer * (mNumberOfInputs + 1) + (mNumberOfHiddenLayers - 1) * mNumberOfNodesPerHiddenLayer * (mNumberOfNodesPerHiddenLayer + 1) : mNumberOfOutputs * (mNumberOfInputs + 1);
+            mWeights = new float[mWeightCount];
+        }
+
+        ~FFNN()
+        {
+            delete[] mWeights;
         }
 
         int numberOfInputs() const { return mNumberOfInputs; }
         int numberOfOutputs() const { return mNumberOfOutputs; }
         int numberOfHiddenLayers() const { return mNumberOfHiddenLayers; }
         int numberOfNodesPerHiddenLayer() const { return mNumberOfNodesPerHiddenLayer; }
-        int numberOfWeights() { return mWeights.size(); }
+        int numberOfWeights() { return mWeightCount; }
 
-        std::vector<float> & getWeights() { return mWeights; }
+        float * getWeights() { return mWeights; }
 
     private:
 
-        std::vector<float> mWeights;
+        float * mWeights;
+        int mWeightCount;
         int mNumberOfInputs;
         int mNumberOfOutputs;
         int mNumberOfHiddenLayers;
@@ -46,32 +53,44 @@ namespace yannl
     {
         assert(aInputs.size() == aFFNN.numberOfInputs());
 
-        const std::vector<float> & weights = aFFNN.getWeights();
+        float * weights = aFFNN.getWeights();
         float bias = -1;
 
         int weightIndex = 0;
-        std::vector<float> inputs = aInputs;
-        std::vector<float> outputs;
+        int outputBufferSize = std::max(aFFNN.numberOfOutputs(), aFFNN.numberOfNodesPerHiddenLayer());
+        int inputBufferSize = std::max(aFFNN.numberOfInputs(), outputBufferSize);
+        float * inputbuffer = new float[inputBufferSize];
+        float * outputbuffer = new float[outputBufferSize];
+        memcpy(inputbuffer, &aInputs[0], aInputs.size() * sizeof(float));
+        memset(outputbuffer, 0, outputBufferSize * sizeof(float));
+        int inputCount = aInputs.size();
 
         for (int layer = 0; layer < aFFNN.numberOfHiddenLayers() + 1; ++layer)
         {
-            outputs.clear();
-            outputs.resize(layer == aFFNN.numberOfHiddenLayers() ? aFFNN.numberOfOutputs() : aFFNN.numberOfNodesPerHiddenLayer(), 0);
-            for (int node = 0; node < (int)outputs.size(); ++node)
-            {
-                float & sum = outputs[node];
+            int outputCount = layer == aFFNN.numberOfHiddenLayers()  ? aFFNN.numberOfOutputs() : aFFNN.numberOfNodesPerHiddenLayer();
+            memset(outputbuffer, 0, outputCount * sizeof(float));
 
-                for (int inputIndex = 0; inputIndex < (int)inputs.size(); ++inputIndex)
+            for (int node = 0; node < outputCount; ++node)
+            {
+                float & sum = outputbuffer[node];
+
+                for (int inputIndex = 0; inputIndex < inputCount; ++inputIndex)
                 {
-                    sum += weights[weightIndex++] * inputs[inputIndex];
+                    sum += weights[weightIndex++] * inputbuffer[inputIndex];
                 }
                 sum += weights[weightIndex++] * bias;
                 sum = (1 / (1 + exp(-sum)));
             }
 
-            inputs = outputs;
+            inputCount = outputCount;
+            memcpy(inputbuffer, outputbuffer, outputCount * sizeof(float));
         }
 
-        return outputs;
+        std::vector<float> result(inputbuffer, inputbuffer + inputCount);
+
+        delete[] inputbuffer;
+        delete[] outputbuffer;
+
+        return result;
     }
 }

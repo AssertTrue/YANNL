@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yannl", "yannl\yannl.vcxproj", "{679E12EA-F33A-4DCD-8CB3-ABA51A7D3EC4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "profiling", "profiling\profiling.vcxproj", "{F96E186A-1BDD-4008-9C2F-EBD7A0EE52B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -15,8 +17,15 @@ Global
 		{679E12EA-F33A-4DCD-8CB3-ABA51A7D3EC4}.Debug|Win32.Build.0 = Debug|Win32
 		{679E12EA-F33A-4DCD-8CB3-ABA51A7D3EC4}.Release|Win32.ActiveCfg = Release|Win32
 		{679E12EA-F33A-4DCD-8CB3-ABA51A7D3EC4}.Release|Win32.Build.0 = Release|Win32
+		{F96E186A-1BDD-4008-9C2F-EBD7A0EE52B3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F96E186A-1BDD-4008-9C2F-EBD7A0EE52B3}.Debug|Win32.Build.0 = Debug|Win32
+		{F96E186A-1BDD-4008-9C2F-EBD7A0EE52B3}.Release|Win32.ActiveCfg = Release|Win32
+		{F96E186A-1BDD-4008-9C2F-EBD7A0EE52B3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
